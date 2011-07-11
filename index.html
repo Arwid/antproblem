@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title></title>
+	</head>
+	<body onLoad="document.forms[0].onsubmit()">
+		<form onSubmit="draw(this.magic.value); return false;">
+			<label for="magic">Enter a Magic Sum between 2 and 27</label>
+			<input type="number" name="magic" min="2" max="27" value="25" 
+				onChange="this.form.onsubmit();">
+		</form>
+		<div id="content"></div>
+		<p>Made by Arwid Bancewicz <a href="http://arwid.ca">//arwid.ca</a></p>
+		<script>
+
+			function draw(magicSum) {
+				// validation
+				if (magicSum < 2 || magicSum > 27) 
+					return alert("magicSum must be between 2 and 27");
+					
+				// Canvas Configuration
+				var cellWidth = 1; // cell width in pixels
+				var cellHeight = 1; // cell height in pixels
+				var cellColourNA = "black"; // not accessible
+				var cellColourMA = "white"; // maybe accessible
+				var cellColourA = "yellow"; // accessible
+
+				// Dont change
+				var dim = (dim = magicSum - 18) > 1 ? dim : 1; // number of blocks
+				var rowCount = dim*100 + 1; // total number of rows to display
+				var colCount = dim*100 + 1; // total number of columns to display
+				var rowOffset = 999; // starting row
+				var colOffset = 999; // starting column
+
+				// add canvas
+				var content = document.getElementById("content");
+				content.innerHTML = "";
+				var canvas = document.createElement("canvas");
+				content.appendChild(canvas, document.body.childNodes[0]);
+
+				// configure the canvas
+				canvas.width = colCount*cellWidth;
+				canvas.height = rowCount*cellHeight;
+				var context = canvas.getContext('2d');
+
+				// draw
+				var sum = 0;
+				for (var r = 0; r < rowCount; r++) {
+					for (var c = 0; c < colCount; c++) {
+						var blockRow = Math.floor(r / 100);
+						var blockCol = Math.floor(c / 100);
+						var blockCellRow = r % 100;
+						var blockCellCol = c % 100;
+						var cellSum = SumDigits(r+rowOffset) + SumDigits(c+colOffset);
+						if (cellSum > magicSum) {
+							// not accesible region
+							context.fillStyle = cellColourNA;
+						} else if (
+							// artificially (for performance) determine if this block is 
+							// accessible
+							(blockCol+blockRow) < dim
+							&& blockCellRow+blockCellCol 
+							<= 10*(Math.max(magicSum-9,1)-(blockCol+blockRow))) {
+							// accessible region
+							context.fillStyle = cellColourA;
+							sum ++;
+						} else {
+							// not accessible region
+							context.fillStyle = cellColourMA;
+						}
+						// draw cell (left, top, width, height)
+						context.fillRect(c*cellWidth, r*cellHeight, cellWidth, cellHeight);
+					}
+				}
+
+				// add info
+				var divEl = document.createElement("div");
+				divEl.innerHTML = "<strong>["+rowOffset+", "+(rowOffset+rowCount)+"]"
+					+" x ["+colOffset+", "+(colOffset+colCount)+"]</strong>"
+					+" with magicSum <strong>"+magicSum+"</strong> has "
+					+"<strong>"+sum.toString().replace(/\B(?=(?:\d{3})+(?!\d))/g, ",")
+					+"</strong> accessible points.";
+				content.appendChild(divEl, document.body.childNodes[0]);
+
+				// Returns sum of digits in a number
+				function SumDigits(n) {
+					var sum = 0;
+					while( n ){
+						sum += n % 10;
+						n = Math.floor(n / 10);
+					}
+					return sum;
+				}
+			}
+		</script>
+	</body>
+</html>

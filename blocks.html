@@ -1,0 +1,97 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<html>
+	<head>
+		<title></title>
+		<style type="text/css">
+			table {
+				border: 1px solid grey;
+			}
+			
+			td {
+				width: 2px; min-width: 2px;
+				height: 1px; min-height: 1px;
+				margin: 0;
+				padding: 0;
+			}
+			
+			td.dark {
+				background: black;
+			}
+			
+			td.light {
+				background: yellow;
+			}
+			
+			td {
+				border-right: 1px solid grey;
+				border-bottom: 1px solid grey;
+			}
+			td:last-child {
+				border-right: none;
+			}
+			tr:last-child td {
+				border-bottom: none;
+			}
+		</style>
+	</head>
+	<body>
+		<table id="mainTable" border="0" cellpadding="0" cellspacing="0"></table>
+		
+		<script>
+			var table = document.getElementById("mainTable");
+			
+			var magicSum = 15;
+			var rowCount = 701;
+			var colCount = 701;
+			var rowOffset = 999;
+			var colOffset = 999;
+			
+			function colourCell(cell) {
+				var row = cell.parentNode.rowIndex;
+				var col = cell.cellIndex;
+				var blockRow = Math.floor(row / 100);
+				var blockCol = Math.floor(col / 100);
+				var realBlockRow = row % 100;
+				var realBlockCol = col % 100;
+				var realRow = row + rowOffset;
+				var realCol = col + colOffset;
+				var cellSum = sum(realRow) + sum(realCol);
+				if (cellSum > magicSum) {
+					cell.className = "dark";
+				} else if ((blockCol+blockRow) < 7 && realBlockRow+realBlockCol <= 10*(16-blockCol-blockRow)) {
+					cell.className = "light";
+				}
+			}
+			
+			function sum(num) {
+				var sum = 0;
+				while( num ){
+					sum += num % 10;
+					num = Math.floor(num / 10);
+				}
+				return sum;
+			}
+			
+			function addCells(table, rows, cols) {
+				for (var row = 0; row < rows; row++) {
+					addCellsToRow(table.insertRow(row), cols);
+				}
+			}
+			
+			function addCellsToRow(row, cols) {
+				for (var col = 0; col < cols; col++) {
+					colourCell(row.insertCell(col));
+				}
+			}
+			
+			// add info
+			var elem = document.createElement("div");
+			elem.innerHTML = rowOffset+"..."+(rowOffset+rowCount)+" by "+colOffset+"..."+(colOffset+colCount);
+			document.body.insertBefore(elem, document.body.childNodes[0]);
+			
+			// add cells
+			addCells(table, rowCount, colCount);
+			
+		</script>
+	</body>
+</html>
